@@ -1,5 +1,16 @@
 import linear_algebra.matrix.pos_def
 
+namespace finset
+variables {M ι : Type*} [ordered_cancel_comm_monoid M] {f g : ι → M} {s t : finset ι}
+open_locale big_operators
+
+--TODO: move
+@[to_additive sum_pos'] lemma one_lt_prod' (Hle : ∀ i ∈ s, 1 ≤ f i) (Hlt : ∃ i ∈ s, 1 < f i) :
+  1 < (∏ i in s, f i) :=
+lt_of_le_of_lt (by rw prod_const_one) $ prod_lt_prod' Hle Hlt
+
+end finset
+
 namespace matrix
 variables {𝕜 : Type*} [is_R_or_C 𝕜] {m n : Type*} [fintype m] [fintype n]
 open_locale matrix
@@ -39,6 +50,25 @@ begin
   exact mul_nonneg (hf i) (mul_self_nonneg (x i))
 end
 
+lemma pos_def_diagonal [decidable_eq n] {f : n → ℝ} (hf : ∀ i, 0 < f i) :
+  (diagonal f).pos_def :=
+begin
+  refine ⟨is_hermitian_diagonal _, _⟩,
+  intros x hx,
+  simp only [star, id.def, is_R_or_C.re_to_real],
+  apply finset.sum_pos',
+  { intros i _,
+    rw [mul_vec_diagonal f x i, mul_comm, mul_assoc],
+    exact mul_nonneg (le_of_lt (hf i)) (mul_self_nonneg (x i)) },
+  { contrapose! hx,
+    ext i,
+    have := hx i (finset.mem_univ _),
+    rw [mul_vec_diagonal f x i, mul_comm, mul_assoc] at this,
+    have := nonpos_of_mul_nonpos_right this (hf i),
+    rw mul_self_eq_zero.1 (le_antisymm this (mul_self_nonneg (x i))),
+    refl }
+end
+
 -- instance : nontrivial 𝕜 := by apply_instance--infinite.nontrivial 𝕜
 instance : is_domain 𝕜 := by apply_instance
 
@@ -62,10 +92,18 @@ begin
   simpa using this,
 end
 
+lemma is_hermitian.nonsingular_inv [decidable_eq n] {M : matrix n n 𝕜}
+  (hM : M.is_hermitian) (hMdet : is_unit M.det):
+  M⁻¹.is_hermitian :=
+begin
+  refine (matrix.inv_eq_right_inv _).symm,
+  rw [conj_transpose_nonsing_inv, hM.eq, mul_nonsing_inv _ hMdet]
+end
+
 lemma pos_def.nonsingular_inv [decidable_eq n] {M : matrix n n 𝕜} (hM : M.pos_def) :
   M⁻¹.pos_def :=
 begin
-  refine ⟨sorry, _⟩,
+  refine ⟨is_hermitian.nonsingular_inv hM.1 (is_unit_iff_ne_zero.2 hM.det_ne_zero), _⟩,
   intros x hx,
   have hMMinv := (mul_nonsing_inv _ (is_unit_iff_ne_zero.2 hM.det_ne_zero)),
   have hMinvdet : M⁻¹.det ≠ 0 := det_ne_zero_of_left_inverse hMMinv,
@@ -79,6 +117,16 @@ end
 lemma is_hermitian.conj_transpose_mul_mul (M N : matrix n n 𝕜) (hM : M.is_hermitian) :
   (Nᴴ ⬝ M ⬝ N).is_hermitian :=
 by simp [is_hermitian, hM.eq, matrix.mul_assoc]
+
+lemma pos_def.conj_transpose_mul_mul [decidable_eq n]
+    (M N : matrix n n 𝕜) (hM : M.pos_def) (hN : N.det ≠ 0):
+  (Nᴴ ⬝ M ⬝ N).pos_def :=
+begin
+  refine ⟨hM.1.conj_transpose_mul_mul M N, _⟩,
+  intros x hx,
+  convert hM.2 (N.mul_vec x) (λ h, hx (eq_zero_of_mul_vec_eq_zero hN h)) using 2,
+  rw [matrix.mul_assoc, mul_vec_mul_vec, ←mul_vec_mul_vec, dot_product_mul_vec, star_mul_vec]
+end
 
 lemma pos_semidef.conj_transpose_mul_mul (M N : matrix n n 𝕜) (hM : M.pos_semidef) :
   (Nᴴ ⬝ M ⬝ N).pos_semidef :=

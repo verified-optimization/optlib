@@ -33,19 +33,13 @@ open_locale big_operators
 open_locale matrix
 
 
--- If A is semidef, then BᵀAB is semidef.
-#check pos_semidef.mul_mul_of_is_hermitian
---
-
 #check is_hermitian.eigenvector_matrix
 
 -- -- where μ i are the eigenvalues of A.sqrt⁻¹ ⬝ B ⬝ A.sqrt⁻¹
 
 #check is_hermitian.eigenvalues
 
--- A (1 + A.sqrt⁻¹ ⬝ B ⬝ A.sqrt⁻¹) = A.sqrt ⬝ (A + B) ⬝ A.sqrt⁻¹
 
-#check pos_def.eigenvalues_pos
 
 
 namespace is_hermitian
@@ -87,22 +81,41 @@ begin
   refl
 end
 
-lemma pos_semidef.sqrt.pos_semidef {A : matrix n n ℝ} (hA : A.pos_semidef) :
+lemma pos_semidef.pos_semidef_sqrt {A : matrix n n ℝ} (hA : A.pos_semidef) :
   hA.1.sqrt.pos_semidef :=
 pos_semidef.conj_transpose_mul_mul _ _
   (pos_semidef_diagonal (λ i, real.sqrt_nonneg (hA.1.eigenvalues i)))
 
-lemma det_add_det_le_det_add [nonempty n] (A B : matrix n n ℝ) (hA : A.pos_def) (hB : B.pos_semidef) :
+#check is_hermitian.eigenvector_matrix
+
+lemma pos_def.pos_def_sqrt {A : matrix n n ℝ} (hA : A.pos_def) :
+  hA.1.sqrt.pos_def :=
+begin
+  unfold is_hermitian.sqrt,
+  refine
+    pos_def.conj_transpose_mul_mul _ (hA.1.eigenvector_matrixᵀ)
+      (pos_def_diagonal (λ i, real.sqrt_pos.2 (hA.eigenvalues_pos i))) _,
+  show det hA.1.eigenvector_matrixᵀ ≠ 0,
+  sorry
+end
+
+lemma det_add_det_le_det_add' [nonempty n] (A B : matrix n n ℝ) (hA : A.pos_def) (hB : B.pos_semidef) :
   A.det + B.det ≤ (A + B).det :=
 begin
   let sqrtA := hA.1.sqrt,
-  have is_hermitian_sqrtA : sqrtA⁻¹.is_hermitian := sorry,
+  have is_hermitian_sqrtA : sqrtA⁻¹.is_hermitian,
+  { apply is_hermitian.nonsingular_inv (hA.pos_semidef.pos_semidef_sqrt.1),
+    exact is_unit_iff_ne_zero.2 hA.pos_def_sqrt.det_ne_zero },
   have hABA : (sqrtA⁻¹ ⬝ B ⬝ sqrtA⁻¹).pos_semidef,
     from pos_semidef.mul_mul_of_is_hermitian hB is_hermitian_sqrtA,
   have := finset.one_add_prod_le_prod_one_add hABA.1.eigenvalues,
+  have := is_hermitian.det_eq_prod_eigenvalues,
   sorry
   -- A.det + B.det = A.det * (1 + A.sqrt⁻¹ ⬝ B ⬝ A.sqrt⁻¹).det
   -- ... ≤ A.det * (1 + A.sqrt⁻¹ ⬝ B ⬝ A.sqrt⁻¹).det = (A+B).det
+
+
+-- A (1 + A.sqrt⁻¹ ⬝ B ⬝ A.sqrt⁻¹) = A.sqrt ⬝ (A + B) ⬝ A.sqrt⁻¹
 
 end
 
