@@ -1,6 +1,6 @@
 import missing.linear_algebra.matrix.pos_def
 import linear_algebra.matrix.ldl
-import linear_algebra.matrix.spectrum
+
 
 namespace finset
 open_locale big_operators
@@ -86,7 +86,12 @@ lemma pos_semidef.pos_semidef_sqrt {A : matrix n n ℝ} (hA : A.pos_semidef) :
 pos_semidef.conj_transpose_mul_mul _ _
   (pos_semidef_diagonal (λ i, real.sqrt_nonneg (hA.1.eigenvalues i)))
 
-#check is_hermitian.eigenvector_matrix
+
+lemma is_hermitian.one_add {A : matrix n n ℝ} (hA : A.is_hermitian) : (1 + A).is_hermitian := sorry
+
+lemma eigenvalues_one_add {A : matrix n n ℝ} (hA : A.is_hermitian) :
+  hA.one_add.eigenvalues = hA.eigenvalues :=
+sorry
 
 lemma pos_def.pos_def_sqrt {A : matrix n n ℝ} (hA : A.pos_def) :
   hA.1.sqrt.pos_def :=
@@ -106,16 +111,38 @@ begin
   have is_hermitian_sqrtA : sqrtA⁻¹.is_hermitian,
   { apply is_hermitian.nonsingular_inv (hA.pos_semidef.pos_semidef_sqrt.1),
     exact is_unit_iff_ne_zero.2 hA.pos_def_sqrt.det_ne_zero },
-  have hABA : (sqrtA⁻¹ ⬝ B ⬝ sqrtA⁻¹).pos_semidef,
+  have pos_semidef_ABA : (sqrtA⁻¹ ⬝ B ⬝ sqrtA⁻¹).pos_semidef,
     from pos_semidef.mul_mul_of_is_hermitian hB is_hermitian_sqrtA,
-  have := finset.one_add_prod_le_prod_one_add hABA.1.eigenvalues,
-  have := is_hermitian.det_eq_prod_eigenvalues,
-  sorry
-  -- A.det + B.det = A.det * (1 + A.sqrt⁻¹ ⬝ B ⬝ A.sqrt⁻¹).det
-  -- ... ≤ A.det * (1 + A.sqrt⁻¹ ⬝ B ⬝ A.sqrt⁻¹).det = (A+B).det
+  let μ := pos_semidef_ABA.1.eigenvalues,
+  calc
+    A.det + B.det = A.det * (1 + (sqrtA⁻¹ ⬝ B ⬝ sqrtA⁻¹).det) :
+      begin
+        rw [det_mul, det_mul, mul_comm _ B.det, mul_assoc, ←det_mul, ←matrix.mul_inv_rev,
+          hA.pos_semidef.sqrt_mul_sqrt, mul_add, mul_one, mul_comm, mul_assoc, ←det_mul,
+          nonsing_inv_mul _ (is_unit_iff_ne_zero.2 hA.det_ne_zero), det_one, mul_one]
+      end
+    ... = A.det * (1 + ∏ i, μ i) :
+      begin
+        rw pos_semidef_ABA.1.det_eq_prod_eigenvalues,
+        refl
+      end
+    ... ≤ A.det * ∏ i, (1 + μ i) :
+      begin
+        apply (mul_le_mul_left hA.det_pos).2,
+        apply finset.one_add_prod_le_prod_one_add μ pos_semidef_ABA.eigenvalues_nonneg
+      end
+    ... = A.det * (1 + sqrtA⁻¹ ⬝ B ⬝ sqrtA⁻¹).det :
+      begin
+        sorry
+      end
+    ... = (A+B).det :
+      begin
+        -- A (1 + A.sqrt⁻¹ ⬝ B ⬝ A.sqrt⁻¹) = A.sqrt ⬝ (A + B) ⬝ A.sqrt⁻¹
+        sorry
+      end
+end
 
 
--- A (1 + A.sqrt⁻¹ ⬝ B ⬝ A.sqrt⁻¹) = A.sqrt ⬝ (A + B) ⬝ A.sqrt⁻¹
 
 end
 
