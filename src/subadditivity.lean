@@ -34,16 +34,6 @@ variables {n : Type*} [fintype n] [decidable_eq n] [linear_order n] [locally_fin
 open_locale big_operators
 open_locale matrix
 
-
-#check is_hermitian.eigenvector_matrix
-
--- -- where μ i are the eigenvalues of A.sqrt⁻¹ ⬝ B ⬝ A.sqrt⁻¹
-
-#check is_hermitian.eigenvalues
-
-
-
-
 namespace is_hermitian
 
 variables {𝕜 : Type*} [decidable_eq 𝕜 ] [is_R_or_C 𝕜] {A : matrix n n 𝕜} (hA : A.is_hermitian)
@@ -90,7 +80,7 @@ pos_semidef.conj_transpose_mul_mul _ _
 
 
 lemma is_hermitian.one_add {A : matrix n n ℝ} (hA : A.is_hermitian) : (1 + A).is_hermitian :=
-sorry
+by simp [is_hermitian, hA.eq]
 
 lemma is_hermitian.has_eigenvector_one_add {A : matrix n n ℝ} (hA : A.is_hermitian) (i : n) :
   module.End.has_eigenvector (1 + A.to_lin') (1 + (hA.eigenvalues i)) ((hA.eigenvector_basis) i) :=
@@ -106,16 +96,20 @@ begin
     pos_def.conj_transpose_mul_mul _ (hA.1.eigenvector_matrixᵀ)
       (pos_def_diagonal (λ i, real.sqrt_pos.2 (hA.eigenvalues_pos i))) _,
   show det hA.1.eigenvector_matrixᵀ ≠ 0,
-  sorry
+  rw [det_transpose],
+  apply det_ne_zero_of_right_inverse hA.1.eigenvector_matrix_mul_inv,
 end
 
-lemma det_add_det_le_det_add' [nonempty n] (A B : matrix n n ℝ) (hA : A.pos_def) (hB : B.pos_semidef) :
+lemma det_add_det_le_det_add' [nonempty n] (A B : matrix n n ℝ)
+    (hA : A.pos_def) (hB : B.pos_semidef) :
   A.det + B.det ≤ (A + B).det :=
 begin
   let sqrtA := hA.1.sqrt,
+  have is_unit_det_sqrtA, from is_unit_iff_ne_zero.2 hA.pos_def_sqrt.det_ne_zero,
+  have : is_unit sqrtA, from (is_unit_iff_is_unit_det _).2 is_unit_det_sqrtA,
   have is_hermitian_sqrtA : sqrtA⁻¹.is_hermitian,
   { apply is_hermitian.nonsingular_inv (hA.pos_semidef.pos_semidef_sqrt.1),
-    exact is_unit_iff_ne_zero.2 hA.pos_def_sqrt.det_ne_zero },
+    exact is_unit_det_sqrtA },
   have pos_semidef_ABA : (sqrtA⁻¹ ⬝ B ⬝ sqrtA⁻¹).pos_semidef,
     from pos_semidef.mul_mul_of_is_hermitian hB is_hermitian_sqrtA,
   let μ := pos_semidef_ABA.1.eigenvalues,
@@ -148,16 +142,20 @@ begin
       end
     ... = (A+B).det :
       begin
-        -- A (1 + A.sqrt⁻¹ ⬝ B ⬝ A.sqrt⁻¹) = A.sqrt ⬝ (A + B) ⬝ A.sqrt⁻¹
-        sorry
+        rw [← det_mul, ← det_conj this (A + B)],
+        apply congr_arg,
+        rw ←hA.pos_semidef.sqrt_mul_sqrt,
+        change sqrtA ⬝ sqrtA ⬝ (1 + sqrtA⁻¹ ⬝ B ⬝ sqrtA⁻¹) = sqrtA ⬝ (sqrtA ⬝ sqrtA + B) ⬝ sqrtA⁻¹,
+        rw [matrix.mul_add, matrix.mul_one, matrix.mul_add, matrix.add_mul,
+          matrix.mul_assoc, matrix.mul_assoc, matrix.mul_assoc, matrix.mul_assoc,
+          ← matrix.mul_assoc _ _ (B ⬝ _),
+          matrix.mul_nonsing_inv _ is_unit_det_sqrtA, matrix.one_mul, matrix.mul_one,
+          hA.pos_semidef.sqrt_mul_sqrt, matrix.mul_assoc]
       end
 end
 
-
-
-end
-
-lemma det_add_det_le_det_add [nonempty n] (A B : matrix n n ℝ) (hA : A.pos_semidef) (hB : B.pos_semidef) :
+lemma det_add_det_le_det_add [nonempty n] (A B : matrix n n ℝ)
+    (hA : A.pos_semidef) (hB : B.pos_semidef) :
   A.det + B.det ≤ (A + B).det :=
 begin
 -- !!! Inverse of square root is only defined for pos_definite matrices !!!
