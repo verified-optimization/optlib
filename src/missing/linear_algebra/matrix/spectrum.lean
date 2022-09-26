@@ -9,14 +9,17 @@ variables {A : matrix n n 𝕜}
 open_locale matrix
 open_locale big_operators
 
-namespace is_hermitian
+lemma is_hermitian.has_eigenvector_eigenvector_basis (hA : A.is_hermitian) (i : n) :
+  module.End.has_eigenvector A.to_lin' (hA.eigenvalues i) (hA.eigenvector_basis i) :=
+begin
+  simp only [is_hermitian.eigenvector_basis, orthonormal_basis.coe_reindex],
+  apply linear_map.is_symmetric.has_eigenvector_eigenvector_basis
+end
 
-variables (hA : A.is_hermitian)
-include hA
-
+-- TODO: can be used to prove `spectral_theorem`.
 /-- *Diagonalization theorem*, *spectral theorem* for matrices; A hermitian matrix can be
 diagonalized by a change of basis using a matrix consisting of eigenvectors. -/
-theorem spectral_theorem' (xs : orthonormal_basis n 𝕜 (euclidean_space 𝕜 n)) (as : n → ℝ)
+theorem spectral_theorem (xs : orthonormal_basis n 𝕜 (euclidean_space 𝕜 n)) (as : n → ℝ)
     (hxs : ∀ j, module.End.has_eigenvector A.to_lin' (as j) (xs j)) :
   xs.to_basis.to_matrix (pi.basis_fun 𝕜 n) ⬝ A =
     diagonal (coe ∘ as) ⬝ xs.to_basis.to_matrix (pi.basis_fun 𝕜 n) :=
@@ -45,6 +48,15 @@ begin
       equiv.apply_symm_apply] }
 end
 
+-- TODO: use this to derive `is_hermitian.det_eq_prod_eigenvalues`
+/-- The determinant of a matrix is the product of its eigenvalues. -/
+lemma det_eq_prod_eigenvalues (xs : orthonormal_basis n 𝕜 (euclidean_space 𝕜 n)) (as : n → ℝ)
+    (hxs : ∀ j, module.End.has_eigenvector A.to_lin' (as j) (xs j)) :
+  det A = ∏ i, as i :=
+begin
+  apply mul_left_cancel₀ (det_ne_zero_of_left_inverse
+    (basis.to_matrix_mul_to_matrix_flip (pi.basis_fun 𝕜 n) xs.to_basis)),
+  rw [←det_mul, spectral_theorem xs as hxs, det_mul, mul_comm, det_diagonal]
+end
 
-end is_hermitian
 end matrix

@@ -1,4 +1,6 @@
 import missing.linear_algebra.matrix.pos_def
+import missing.linear_algebra.matrix.spectrum
+import missing.linear_algebra.eigenspace
 import linear_algebra.matrix.ldl
 
 
@@ -87,11 +89,14 @@ pos_semidef.conj_transpose_mul_mul _ _
   (pos_semidef_diagonal (λ i, real.sqrt_nonneg (hA.1.eigenvalues i)))
 
 
-lemma is_hermitian.one_add {A : matrix n n ℝ} (hA : A.is_hermitian) : (1 + A).is_hermitian := sorry
-
-lemma eigenvalues_one_add {A : matrix n n ℝ} (hA : A.is_hermitian) :
-  hA.one_add.eigenvalues = hA.eigenvalues :=
+lemma is_hermitian.one_add {A : matrix n n ℝ} (hA : A.is_hermitian) : (1 + A).is_hermitian :=
 sorry
+
+lemma is_hermitian.has_eigenvector_one_add {A : matrix n n ℝ} (hA : A.is_hermitian) (i : n) :
+  module.End.has_eigenvector (1 + A.to_lin') (1 + (hA.eigenvalues i)) ((hA.eigenvector_basis) i) :=
+module.End.has_eigenvector_add
+  (module.End.has_eigenvector_one (hA.has_eigenvector_eigenvector_basis i).2)
+  (hA.has_eigenvector_eigenvector_basis i)
 
 lemma pos_def.pos_def_sqrt {A : matrix n n ℝ} (hA : A.pos_def) :
   hA.1.sqrt.pos_def :=
@@ -133,7 +138,13 @@ begin
       end
     ... = A.det * (1 + sqrtA⁻¹ ⬝ B ⬝ sqrtA⁻¹).det :
       begin
-        sorry
+        congr',
+        refine (det_eq_prod_eigenvalues pos_semidef_ABA.1.eigenvector_basis
+          (λ i, 1 + (pos_semidef_ABA.1.eigenvalues i)) _).symm,
+        intro i,
+        convert pos_semidef_ABA.1.has_eigenvector_one_add i,
+        simp only [map_add, to_lin'_one, to_lin'_mul, add_left_inj],
+        refl,
       end
     ... = (A+B).det :
       begin
