@@ -164,6 +164,13 @@ end
   (M.submatrix e e).pos_semidef ↔ M.pos_semidef :=
 ⟨λ h, by simpa using h.submatrix e.symm, λ h, h.submatrix _⟩
 
+lemma pos_semidef.add {M N: matrix n n 𝕜} (hM : M.pos_semidef) (hN : N.pos_semidef) :
+  (M + N).pos_semidef :=
+begin
+  refine ⟨hM.1.add hN.1, λ x, _⟩,
+  simp only [add_mul_vec, dot_product_add, map_add],
+  apply add_nonneg (hM.2 x) (hN.2 x)
+end
 
 namespace pos_def
 
@@ -191,6 +198,13 @@ include hM
 
 lemma eigenvalues_nonneg [decidable_eq n] (i : n) : 0 ≤ hM.1.eigenvalues i :=
 by {rw hM.is_hermitian.eigenvalues_eq, apply hM.2}
+
+lemma det_nonneg [decidable_eq n] : 0 ≤ det M :=
+begin
+  rw [hM.1.det_eq_prod_eigenvalues],
+  apply finset.prod_nonneg (λ i hi, _),
+  apply eigenvalues_nonneg,
+end
 
 end pos_semidef
 

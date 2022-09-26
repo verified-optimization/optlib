@@ -118,6 +118,8 @@ begin
   apply hdet rfl
 end
 
+/-- Subadditivity lemma for positive semidefinite matrices. This version assumes that one of the
+matrices is positive definite. See `det_add_det_le_det_add` for the more general statement. -/
 lemma det_add_det_le_det_add' [nonempty n] (A B : matrix n n ℝ)
     (hA : A.pos_def) (hB : B.pos_semidef) :
   A.det + B.det ≤ (A + B).det :=
@@ -172,6 +174,7 @@ begin
       end
 end
 
+/-- Subadditivity lemma for positive semidefinite matrices. -/
 lemma det_add_det_le_det_add [nonempty n] (A B : matrix n n ℝ)
     (hA : A.pos_semidef) (hB : B.pos_semidef) :
   A.det + B.det ≤ (A + B).det :=
@@ -179,9 +182,7 @@ begin
   by_cases hA' : A.det = 0,
   { by_cases hB' : B.det = 0,
     { simp [hA', hB'],
-      have : (A+B).pos_semidef,
-      sorry,
-      sorry, },
+      apply (hA.add hB).det_nonneg },
     { rw [add_comm A B, add_comm A.det B.det],
       apply det_add_det_le_det_add' _ _ (hB.pos_def_iff_det_ne_zero.2 hB') hA }, },
   { apply det_add_det_le_det_add' _ _ (hA.pos_def_iff_det_ne_zero.2 hA') hB },
