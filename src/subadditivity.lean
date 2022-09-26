@@ -2,6 +2,7 @@ import missing.linear_algebra.matrix.pos_def
 import missing.linear_algebra.matrix.spectrum
 import missing.linear_algebra.eigenspace
 import linear_algebra.matrix.ldl
+import linear_algebra.matrix.dot_product
 
 
 namespace finset
@@ -78,7 +79,6 @@ lemma pos_semidef.pos_semidef_sqrt {A : matrix n n ℝ} (hA : A.pos_semidef) :
 pos_semidef.conj_transpose_mul_mul _ _
   (pos_semidef_diagonal (λ i, real.sqrt_nonneg (hA.1.eigenvalues i)))
 
-
 lemma is_hermitian.one_add {A : matrix n n ℝ} (hA : A.is_hermitian) : (1 + A).is_hermitian :=
 by simp [is_hermitian, hA.eq]
 
@@ -98,6 +98,24 @@ begin
   show det hA.1.eigenvector_matrixᵀ ≠ 0,
   rw [det_transpose],
   apply det_ne_zero_of_right_inverse hA.1.eigenvector_matrix_mul_inv,
+end
+
+lemma pos_semidef.pos_def_iff_det_ne_zero [decidable_eq n] {M : matrix n n ℝ} (hM : M.pos_semidef) :
+  M.pos_def ↔ M.det ≠ 0 :=
+begin
+  refine ⟨pos_def.det_ne_zero, λ hdet, ⟨hM.1, _⟩⟩,
+  intros x hx,
+  apply lt_of_le_of_ne' (hM.2 x),
+  rw [←hM.sqrt_mul_sqrt, ←mul_vec_mul_vec, dot_product_mul_vec, ←transpose_transpose hM.1.sqrt,
+    vec_mul_transpose, transpose_transpose, ← conj_transpose_eq_transpose,
+    hM.pos_semidef_sqrt.1.eq],
+  simp only [is_R_or_C.re_to_real, star, id],
+  change @inner ℝ (euclidean_space ℝ _) _ (hM.1.sqrt.mul_vec x) (hM.1.sqrt.mul_vec x) ≠ 0,
+  intro hinner,
+  have sqrtMdet0 : hM.1.sqrt.det = 0,
+    from exists_mul_vec_eq_zero_iff.1 ⟨x, hx, inner_self_eq_zero.1 hinner⟩,
+  rw [←hM.sqrt_mul_sqrt, det_mul, sqrtMdet0, mul_zero] at hdet,
+  apply hdet rfl
 end
 
 lemma det_add_det_le_det_add' [nonempty n] (A B : matrix n n ℝ)
@@ -158,8 +176,15 @@ lemma det_add_det_le_det_add [nonempty n] (A B : matrix n n ℝ)
     (hA : A.pos_semidef) (hB : B.pos_semidef) :
   A.det + B.det ≤ (A + B).det :=
 begin
--- !!! Inverse of square root is only defined for pos_definite matrices !!!
--- --> go through all 4 cases.
+  by_cases hA' : A.det = 0,
+  { by_cases hB' : B.det = 0,
+    { simp [hA', hB'],
+      have : (A+B).pos_semidef,
+      sorry,
+      sorry, },
+    { rw [add_comm A B, add_comm A.det B.det],
+      apply det_add_det_le_det_add' _ _ (hB.pos_def_iff_det_ne_zero.2 hB') hA }, },
+  { apply det_add_det_le_det_add' _ _ (hA.pos_def_iff_det_ne_zero.2 hA') hB },
 end
 
 end matrix
