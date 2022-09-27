@@ -44,7 +44,12 @@ open_locale big_operators
 
 lemma LDL.diag_entries_pos {A : matrix n n ℝ} (hA: A.pos_def) (i : n) :
   0 < LDL.diag_entries hA i :=
-sorry
+begin
+  have : (LDL.lower_inv hA).det ≠ 0, by simp [LDL.det_lower_inv hA],
+  have : LDL.lower_inv hA i ≠ 0,
+    from λ h, this (matrix.det_eq_zero_of_row_eq_zero i (λ j, congr_fun h j)),
+  exact hA.2 (LDL.lower_inv hA i) this,
+end
 
 lemma det_log_atom.solution_eq_atom {A : matrix n n ℝ} (hA: A.pos_def) :
   (∑ i, real.log (LDL.diag_entries hA i)) = real.log (A.det) :=
