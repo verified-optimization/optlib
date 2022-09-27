@@ -1,29 +1,6 @@
-import linear_algebra.matrix.ldl
+import missing.linear_algebra.matrix.ldl
 import schur_complement
 import subadditivity
-
-section gram_schmidt
-
-variables (𝕜 : Type*) {E : Type*} [is_R_or_C 𝕜] [inner_product_space 𝕜 E]
-variables {ι : Type*} [linear_order ι] [locally_finite_order_bot ι] [is_well_order ι (<)]
-
-local attribute [instance] is_well_order.to_has_well_founded
-
-local notation `⟪`x`, `y`⟫` := @inner 𝕜 _ _ x y
-
-lemma repr_gram_schmidt_diagonal {i : ι} (b : basis ι 𝕜 E) :
-  b.repr (gram_schmidt 𝕜 b i) i = 1 :=
-begin
-  rw [gram_schmidt_def, linear_equiv.map_sub, finsupp.sub_apply, basis.repr_self,
-    finsupp.single_eq_same, sub_eq_self, linear_equiv.map_sum, finsupp.coe_finset_sum,
-    finset.sum_apply, finset.sum_eq_zero],
-  intros j hj,
-  rw finset.mem_Iio at hj,
-  simp [orthogonal_projection_singleton, gram_schmidt_triangular 𝕜 hj],
-end
-
-end gram_schmidt
-
 
 namespace matrix
 open_locale matrix
@@ -65,35 +42,24 @@ end
 
 open_locale big_operators
 
-lemma LDL.diag_lower_inv {A : matrix n n ℝ} (hA: A.pos_def) :
-  (LDL.lower_inv hA).diag = 1 :=
-begin
-  rw [LDL.lower_inv_eq_gram_schmidt_basis, basis.to_matrix],
-  ext i,
-  simp only [diag, pi.basis_fun_apply, pi.one_apply, transpose, gram_schmidt_basis],
-  simp,
-  have := @repr_gram_schmidt_diagonal ℝ (n → ℝ) _
-    (inner_product_space.of_matrix hA.transpose) n _ _ _ i (pi.basis_fun ℝ n),
-  simpa using this
-end
+lemma LDL.diag_entries_pos {A : matrix n n ℝ} (hA: A.pos_def) (i : n) :
+  0 < LDL.diag_entries hA i :=
+sorry
 
 lemma det_log_atom.solution_eq_atom {A : matrix n n ℝ} (hA: A.pos_def) :
   (∑ i, real.log (LDL.diag_entries hA i)) = real.log (A.det) :=
 begin
   conv { to_rhs, rw [(LDL.lower_conj_diag hA).symm] },
-  simp only [det_mul, LDL.diag, det_diagonal],
-  rw [mul_comm, ←mul_assoc, ←det_mul],
-
-
+  have := real.log_prod finset.univ (LDL.diag_entries hA)
+    (λ i _, ne_of_gt (LDL.diag_entries_pos hA i)),
+  simp [LDL.diag, this.symm]
 end
 
 lemma det_log_atom.feasibility_exp {A : matrix n n ℝ} (hA: A.pos_def) (i : n) :
   LDL.diag_entries hA i ≤ ((LDL.diag hA) ⬝ ((LDL.lower hA)ᵀ)).diag i :=
 sorry
 
-lemma LDL.diag_entries_pos {A : matrix n n ℝ} (hA: A.pos_def) (i : n) :
-  0 < LDL.diag_entries hA i :=
-sorry
+
 
 def to_upper_tri {m α : Type*} [linear_order m] [has_zero α] (A : matrix m m α) : matrix m m α :=
 λ i j, if i ≤ j then A i j else 0
