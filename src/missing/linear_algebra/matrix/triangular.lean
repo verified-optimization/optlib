@@ -14,8 +14,9 @@ general and then specialized to (nonblock)-triangular matrices here.
 
 namespace matrix
 open_locale big_operators
+open_locale matrix
 variables {α m n : Type*}
-variables {R : Type*} [comm_ring R] {M : matrix m m R}
+variables {R : Type*} [comm_ring R] {M N : matrix m m R}
 
 /-- An upper triangular matrix is a matrix whose entries are zero below the diagonal. -/
 def upper_triangular [has_lt m] (M : matrix m m R) :=
@@ -34,6 +35,26 @@ block_triangular_inv_of_block_triangular hM
 lemma lower_triangular_inv_of_lower_triangular [fintype m] [linear_order m] [invertible M]
   (hM : lower_triangular M) : lower_triangular M⁻¹ :=
 block_triangular_inv_of_block_triangular hM
+
+/-- Multiplication of upper triangular matrices is upper triangular -/
+lemma upper_triangular.mul [fintype m] [linear_order m]
+  (hM : upper_triangular M) (hN : upper_triangular N) : upper_triangular (M ⬝ N) :=
+block_triangular.mul hM hN
+
+/-- Multiplication of lower triangular matrices is lower triangular -/
+lemma lower_triangular.mul [fintype m] [linear_order m]
+  (hM : lower_triangular M) (hN : lower_triangular N) : lower_triangular (M ⬝ N) :=
+block_triangular.mul hM hN
+
+/-- Transpose of lower triangular matrix is upper triangular -/
+lemma lower_triangular.transpose [fintype m] [linear_order m]
+  (hM : lower_triangular M) : upper_triangular Mᵀ :=
+hM.transpose
+
+/-- Transpose of upper triangular matrix is lower triangular -/
+lemma upper_triangular.transpose [fintype m] [linear_order m]
+  (hM : upper_triangular M) : lower_triangular Mᵀ :=
+hM.transpose
 
 lemma diag_inv_mul_diag_eq_one_of_upper_triangular [fintype m] [linear_order m] [invertible M]
   (hM : upper_triangular M) (k : m) : M⁻¹ k k * M k k = 1 :=
