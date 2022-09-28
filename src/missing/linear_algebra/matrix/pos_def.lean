@@ -188,6 +188,9 @@ begin
     is_unit_det_of_invertible hM.is_hermitian.eigenvector_matrixᵀ,
 end
 
+noncomputable instance [decidable_eq n] : invertible M :=
+invertible_of_is_unit_det M (is_unit_iff_ne_zero.2 hM.det_ne_zero)
+
 end pos_def
 
 
