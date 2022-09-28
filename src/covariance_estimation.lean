@@ -12,6 +12,7 @@ noncomputable def matrix.quad_form {n : ℕ} (R : matrix (fin n) (fin n) ℝ) (x
 noncomputable def gaussian_pdf {n : ℕ} (R : matrix (fin n) (fin n) ℝ) (x : fin n → ℝ) : ℝ :=
   (1 / sqrt (((2 * π) ^ n) * R.det)) * exp  (- R⁻¹.quad_form x / 2)
 
+-- TODO: Divide by N!
 def covariance_matrix {N n : ℕ} (y : fin N → fin n → ℝ) : matrix (fin n) (fin n) ℝ :=
   λ i j : fin n, ∑ k : fin N, y k i * y k j
 
