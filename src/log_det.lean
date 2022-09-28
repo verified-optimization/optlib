@@ -8,10 +8,6 @@ variables {n : Type} [fintype n] [linear_order n] [locally_finite_order_bot n]
 variables {𝕜 : Type} [is_R_or_C 𝕜]
 variables {A : matrix n n ℝ} (hA : A.pos_def)
 
-noncomputable def pos_def.invertible (hA : A.pos_def) :
-  invertible A :=
-invertible_of_is_unit_det A (is_unit_iff_ne_zero.2 (ne_of_gt hA.det_pos))
-
 noncomputable instance LDL.invertible_diag : invertible (LDL.diag hA) :=
 begin
   rw LDL.diag_eq_lower_inv_conj,
