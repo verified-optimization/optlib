@@ -62,9 +62,7 @@ end
 
 lemma det_log_atom.feasibility_exp {A : matrix n n ℝ} (hA: A.pos_def) (i : n) :
   LDL.diag_entries hA i ≤ ((LDL.diag hA) ⬝ ((LDL.lower hA)ᵀ)).diag i :=
-sorry
-
-
+by simp [LDL.diag]
 
 def to_upper_tri {m α : Type*} [linear_order m] [has_zero α] (A : matrix m m α) : matrix m m α :=
 λ i j, if i ≤ j then A i j else 0

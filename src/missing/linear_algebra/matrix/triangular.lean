@@ -35,4 +35,20 @@ lemma lower_triangular_inv_of_lower_triangular [fintype m] [linear_order m] [inv
   (hM : lower_triangular M) : lower_triangular M⁻¹ :=
 block_triangular_inv_of_block_triangular hM
 
+lemma diag_inv_mul_diag_eq_one_of_upper_triangular [fintype m] [linear_order m] [invertible M]
+  (hM : upper_triangular M) (k : m) : M⁻¹ k k * M k k = 1 :=
+begin
+  letI : unique {a // id a = k} := ⟨⟨⟨k, rfl⟩⟩, λ j, subtype.ext j.property⟩,
+  simpa [matrix.mul, dot_product, fintype.sum_unique] using
+    congr_fun (congr_fun (to_square_block_inv_mul_to_square_block_eq_one hM k) ⟨k, rfl⟩) ⟨k, rfl⟩,
+end
+
+lemma diag_inv_mul_diag_eq_one_of_lower_triangular [fintype m] [linear_order m] [invertible M]
+  (hM : lower_triangular M) (k : m) : M⁻¹ k k * M k k = 1 :=
+begin
+  letI : unique {a // order_dual.to_dual a = k} := ⟨⟨⟨k, rfl⟩⟩, λ j, subtype.ext j.property⟩,
+  simpa [matrix.mul, dot_product, fintype.sum_unique] using
+    congr_fun (congr_fun (to_square_block_inv_mul_to_square_block_eq_one hM k) ⟨k, rfl⟩) ⟨k, rfl⟩,
+end
+
 end matrix
