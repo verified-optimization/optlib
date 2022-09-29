@@ -4,7 +4,7 @@ This repo contains Lean 3 libraries used in CvxLean. When mathlib is ported to L
 
 ## Porting this repo from Lean3 to Lean4
 
-Make sure that the latest state of `optlib` that you would like to port is on the `master` branch of this repo.
+Make sure that the latest state of `optlib` that you would like to port is on the `master` branch of this repo. All files you would like to port must be directly or indirectly imported by `src/all.lean`.
 
 Go to `https://github.com/verified-optimization/mathport-optlib/actions/workflows/build.yml`.
 
@@ -34,3 +34,5 @@ Open the `lakefile.lean` of CvxLean and paste the new commit number:
   "https://github.com/verified-optimization/optlibport.git"@"[COMMIT]"
 ````
 Run `lake update` and `lake build`.
+
+Now `import Optbin.All` or imports will give you access to the ported libraries.
