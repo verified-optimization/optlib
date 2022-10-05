@@ -119,7 +119,10 @@ begin
 end
 
 /-- Subadditivity lemma for positive semidefinite matrices. This version assumes that one of the
-matrices is positive definite. See `det_add_det_le_det_add` for the more general statement. -/
+matrices is positive definite. See `det_add_det_le_det_add` for the more general statement.
+
+The argument is taken from Andreas Thom's comment on mathoverflow:
+https://mathoverflow.net/questions/65424/determinant-of-sum-of-positive-definite-matrices/65430#65430 -/
 lemma det_add_det_le_det_add' [nonempty n] (A B : matrix n n ℝ)
     (hA : A.pos_def) (hB : B.pos_semidef) :
   A.det + B.det ≤ (A + B).det :=
