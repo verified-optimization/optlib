@@ -27,7 +27,7 @@ finset.prod_pos (λ i hi, gaussian_pdf_pos _ _ h)
 
 lemma log_prod_gaussianPdf {N n : ℕ} (y : fin N → fin n → ℝ) (R : matrix (fin n) (fin n) ℝ) (hR : R.pos_def) :
     (log ∏ i : fin N, gaussian_pdf R (y i))
-    = ∑ i : fin N, (log 1 - (log (sqrt ((2 * π) ^ n)) + log (sqrt (det R))) + - R⁻¹.quad_form (y i) / 2) :=
+    = ∑ i : fin N, (- (log (sqrt ((2 * π) ^ n)) + log (sqrt (det R))) + - R⁻¹.quad_form (y i) / 2) :=
 begin
     have : ∀ i,
       i ∈ finset.univ → gaussian_pdf R (y i) ≠ 0 := λ i hi, ne_of_gt (gaussian_pdf_pos _ _ hR),
@@ -37,7 +37,7 @@ begin
     unfold gaussian_pdf,
     apply congr_arg (finset.sum finset.univ),
     ext i,
-    rw [log_mul, log_div, sqrt_mul, log_mul, log_exp],
+    rw [log_mul, log_div, sqrt_mul, log_mul, log_exp, log_one, zero_sub],
     exact ne_of_gt (sqrt_pos.2 (pow_pos (mul_pos (by simp) pi_pos) _)),
     exact ne_of_gt (sqrt_pos.2 hR.det_pos),
     exact pow_nonneg (mul_nonneg (by simp) (le_of_lt pi_pos)) _,
