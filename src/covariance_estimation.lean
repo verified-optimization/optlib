@@ -79,3 +79,13 @@ by simp
 lemma matrix.pos_def.is_unit_det {n : Type*} [decidable_eq n] [fintype n]
   {M : matrix n n ℝ} (hM : M.pos_def) : is_unit M.det :=
 is_unit_iff_ne_zero.2 hM.det_ne_zero
+
+lemma is_unit_det_of_pos_def_inv {n : Type*} [decidable_eq n] [fintype n]
+  {M : matrix n n ℝ} (h : M⁻¹.pos_def) :
+  is_unit M.det :=
+begin
+  apply is_unit_iff_ne_zero.2,
+  have := h.is_unit_det,
+  rw [det_nonsing_inv, is_unit_ring_inverse] at this,
+  apply is_unit.ne_zero this,
+end
