@@ -191,8 +191,29 @@ end
 noncomputable instance [decidable_eq n] : invertible M :=
 invertible_of_is_unit_det M (is_unit_iff_ne_zero.2 hM.det_ne_zero)
 
+lemma is_unit_det [decidable_eq n]
+  {M : matrix n n ℝ} (hM : M.pos_def) : is_unit M.det :=
+is_unit_iff_ne_zero.2 hM.det_ne_zero
+
 end pos_def
 
+lemma is_unit_det_of_pos_def_inv [decidable_eq n]
+  {M : matrix n n ℝ} (h : M⁻¹.pos_def) :
+  is_unit M.det :=
+begin
+  apply is_unit_iff_ne_zero.2,
+  have := h.is_unit_det,
+  rw [det_nonsing_inv, is_unit_ring_inverse] at this,
+  apply is_unit.ne_zero this,
+end
+
+lemma posdef_inv_iff_posdef [decidable_eq n]
+  (M : matrix n n ℝ) : M⁻¹.pos_def ↔ M.pos_def :=
+begin
+  refine ⟨λ hM, _, λ hM, hM.nonsingular_inv⟩,
+  rw ← matrix.nonsing_inv_nonsing_inv M (is_unit_det_of_pos_def_inv hM),
+  apply hM.nonsingular_inv
+end
 
 namespace pos_semidef
 
