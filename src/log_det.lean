@@ -2,7 +2,7 @@ import missing.linear_algebra.matrix.ldl
 import schur_complement
 import subadditivity
 
-/-- In this file we prove properties needed for the log-det-atom.
+/- In this file we prove properties needed for the log-det-atom.
 We follow the proof in the Mosek documentation:
 https://docs.mosek.com/modeling-cookbook/sdo.html#log-determinant -/
 
