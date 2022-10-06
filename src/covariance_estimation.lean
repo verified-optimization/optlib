@@ -12,9 +12,8 @@ noncomputable def matrix.quad_form {n : ℕ} (R : matrix (fin n) (fin n) ℝ) (x
 noncomputable def gaussian_pdf {n : ℕ} (R : matrix (fin n) (fin n) ℝ) (x : fin n → ℝ) : ℝ :=
   (1 / sqrt (((2 * π) ^ n) * R.det)) * exp  (- R⁻¹.quad_form x / 2)
 
--- TODO: Divide by N!
-def covariance_matrix {N n : ℕ} (y : fin N → fin n → ℝ) : matrix (fin n) (fin n) ℝ :=
-  λ i j : fin n, ∑ k : fin N, y k i * y k j
+noncomputable def covariance_matrix {N n : ℕ} (y : fin N → fin n → ℝ) : matrix (fin n) (fin n) ℝ :=
+  λ i j : fin n, (∑ k : fin N, y k i * y k j) / N
 
 lemma gaussian_pdf_pos {n : ℕ} (R : matrix (fin n) (fin n) ℝ) (y : fin n → ℝ) (h : R.pos_def):
   0 < gaussian_pdf R y :=
@@ -49,14 +48,19 @@ begin
 end
 
 lemma sum_quad_form {n : ℕ} (R : matrix (fin n) (fin n) ℝ) {m : ℕ} (y : fin m → fin n → ℝ) :
-  (∑ x, R.quad_form (y x))
-  = (covariance_matrix y ⬝ Rᵀ).trace :=
+  (∑ i, R.quad_form (y i))
+  = m * (covariance_matrix y ⬝ Rᵀ).trace :=
 begin
-  simp only [matrix.quad_form, matrix.trace, covariance_matrix, diag, mul_apply, finset.sum_mul],
-  simp_rw [@finset.sum_comm _ (fin m)],
+  by_cases h : m = 0,
+  { subst h, simp },
+  simp only [matrix.quad_form, matrix.trace, covariance_matrix, diag, mul_apply, finset.sum_mul,
+    finset.sum_div],
+  simp_rw [@finset.sum_comm _ (fin m), finset.mul_sum],
   apply congr_arg,
   ext i,
   unfold dot_product,
+  have : (m : ℝ) ≠ 0 := by simp [h],
+  simp_rw [← mul_assoc, mul_div_cancel' _ this],
   apply congr_arg,
   ext j,
   simp_rw [mul_assoc, ← finset.mul_sum],
