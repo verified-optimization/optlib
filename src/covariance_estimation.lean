@@ -1,4 +1,4 @@
-import linear_algebra.matrix.pos_def
+import missing.linear_algebra.matrix.pos_def
 
 open real
 open matrix
@@ -72,3 +72,10 @@ begin
   ext j,
   rw [mul_comm, matrix.transpose]
 end
+
+lemma real.inverse_eq_inv (a : ℝ) : ring.inverse a = a⁻¹ :=
+by simp
+
+lemma matrix.pos_def.is_unit_det {n : Type*} [decidable_eq n] [fintype n]
+  {M : matrix n n ℝ} (hM : M.pos_def) : is_unit M.det :=
+is_unit_iff_ne_zero.2 hM.det_ne_zero
