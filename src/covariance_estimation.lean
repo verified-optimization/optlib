@@ -6,7 +6,7 @@ open_locale real
 open_locale matrix
 open_locale big_operators
 
-noncomputable def matrix.quad_form {n : ℕ} (R : matrix (fin n) (fin n) ℝ) (x : fin n → ℝ) : ℝ :=
+def matrix.quad_form {n : ℕ} (R : matrix (fin n) (fin n) ℝ) (x : fin n → ℝ) : ℝ :=
   x ⬝ᵥ R.mul_vec x
 
 noncomputable def gaussian_pdf {n : ℕ} (R : matrix (fin n) (fin n) ℝ) (x : fin n → ℝ) : ℝ :=
