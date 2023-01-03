@@ -17,7 +17,7 @@ begin
     finset.sum_apply, finset.sum_eq_zero],
   intros j hj,
   rw finset.mem_Iio at hj,
-  simp [orthogonal_projection_singleton, gram_schmidt_triangular 𝕜 hj],
+  simp [orthogonal_projection_singleton, gram_schmidt_triangular hj],
 end
 
 end gram_schmidt

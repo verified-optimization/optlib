@@ -37,15 +37,17 @@ begin
     xs' as' hxs',
   { rw [to_lin'_apply],
     simp only [orthonormal_basis.coe_to_basis_repr_apply, of_apply, orthonormal_basis.reindex_repr],
-    rw [equiv.symm_apply_apply, euclidean_space.single, pi_Lp.equiv_symm_apply', mul_vec_single],
+    erw [equiv.symm_apply_apply, euclidean_space.single, pi_Lp.equiv_symm_apply (2 : ennreal),
+      mul_vec_single],
     simp_rw [mul_one],
-    refl },
+    refl, },
   { simp only [diagonal_mul, (∘), as'],
-    rw [basis.to_matrix_apply,
+    erw [basis.to_matrix_apply,
       orthonormal_basis.coe_to_basis_repr_apply, orthonormal_basis.reindex_repr,
       pi.basis_fun_apply, linear_map.coe_std_basis,
-      euclidean_space.single, pi_Lp.equiv_symm_apply', equiv.symm_apply_apply,
-      equiv.apply_symm_apply] }
+      euclidean_space.single, pi_Lp.equiv_symm_apply (2 : ennreal), equiv.symm_apply_apply,
+      equiv.apply_symm_apply],
+    refl, }
 end
 
 -- TODO: use this to derive `is_hermitian.det_eq_prod_eigenvalues`

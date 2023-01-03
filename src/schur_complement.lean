@@ -1,14 +1,9 @@
-/-
-Copyright (c) 2022 Alexander Bentkamp. All rights reserved.
-Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Alexander Bentkamp, Jeremy Avigad, Johan Commelin
--/
 import linear_algebra.matrix.symmetric
 import linear_algebra.matrix.nonsingular_inverse
 import linear_algebra.matrix.pos_def
+import linear_algebra.matrix.hermitian
+import algebra.star.pi
 import missing.linear_algebra.matrix.pos_def
-import missing.linear_algebra.matrix.hermitian
-import missing.algebra.star.pi
 
 /-! # Schur complement
 This file proves properties of the Schur complement `D - C A⁻¹ B` of a block matrix `[A B; C D]`.
